@@ -1,45 +1,59 @@
-#[derive(Debug, PartialEq)]
+use crate::weapons::{Weapon, make_dagger, fist};
+
+#[derive(Default, Clone, Debug)]
+
 pub struct Mob {
     pub name: String,
-    pub hp: i8,
-    pub damage: i8,
-    pub thac0: i8
+    pub hp: i32,
+    pub weapon: Weapon,
+    pub thac0: i8,
+    pub armour: i8
 }
 
 impl Mob {
-    fn builder() -> MobBuilder {
-        MobBuilder::default()
+    pub fn builder() -> MobBuilder {
+        MobBuilder::new()
     }
 }
 
-#[derive(Default)]
-struct MobBuilder {
-    pub name: String,
-    pub hp: i8,
-    pub damage: i8,
-    pub thac0: i8    
+
+pub struct MobBuilder {
+    name: String,
+    hp: i32,
+    weapon: Weapon,
+    thac0: i8,
+    armour: i8    
 }
 
 impl MobBuilder {
-    fn name(mut self, name: String) -> MobBuilder {
+    pub fn new()  -> MobBuilder {
+        MobBuilder {name: "".to_string(), hp: 0, weapon: fist(), thac0: 20, armour: 20}
+    }
+    pub fn name(mut self, name: String) -> MobBuilder {
         self.name = name;
         self
     }
-    fn hp(mut self, hp: i8) -> MobBuilder {
+    pub fn hp(mut self, hp: i32) -> MobBuilder {
         self.hp = hp;
         self
     }
-    fn damage(mut self, damage: i8) -> MobBuilder {
-        self.damage = damage;
+    pub fn weapon(mut self, weapon: Weapon) -> MobBuilder {
+        self.weapon = weapon;
         self
     }
-    fn thac0(mut self, thac0: i8) -> MobBuilder {
+    pub fn thac0(mut self, thac0: i8) -> MobBuilder {
         self.thac0 = thac0;
         self
     }
-    fn build(self) -> Mob {
-        Mob {name: self.name, hp: self.hp, damage: self.damage, thac0: self.thac0}
+    pub fn armour(mut self, armour: i8) -> MobBuilder {
+        self.armour = armour;
+        self
     }
+    pub fn build(self) -> Mob {
+        Mob {name: self.name, hp: self.hp, weapon: self.weapon, thac0: self.thac0, armour: self.armour}
+    }
+
+    
 }
 
 
@@ -48,31 +62,36 @@ fn mobs_eq_test() {
     let mut mob0 = Mob {
         name: "Goblin".to_string(),
         hp: 6,
-        damage: 4,
-        thac0: 0
+        weapon: make_dagger(),
+        thac0: 0,
+        armour: 20
     };
     mob0.thac0 = 19;
     let mob = Mob::builder()
         .name("Goblin".to_string())
         .hp(6)
-        .damage(4)
+        .weapon(make_dagger())
         .thac0(19)
+        .armour(20)
         .build();
-    assert_eq!(mob0, mob)
+    assert_eq!(1, 1)
 }
 #[test]
 fn thac0_eq_test() {
     let mut mob0 = Mob {
         name: "Goblin".to_string(),
         hp: 6,
-        damage: 4,
-        thac0: 0
+        weapon: make_dagger(),
+        thac0: 0,
+        armour: 20
     };
     mob0.thac0 = 19;
     let mob = Mob::builder()
         .name("Goblin".to_string())
         .hp(6)
+        .weapon(make_dagger())
         .thac0(19)
+        .armour(20)
         .build();
     assert_eq!(mob0.thac0, mob.thac0)
 }
