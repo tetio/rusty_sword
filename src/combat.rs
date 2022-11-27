@@ -1,16 +1,16 @@
-use crate::{heroes::Hero, mobs::Mob, weapons::{make_dagger, make_sword}};
+use crate::{heroes::Hero, mobs::Mob, weapons::{make_dagger, make_sword}, monsters::Monster};
 use rand::Rng;
 
-pub fn hero_attacks(mob: &mut Mob, hero: &Hero) { //-> Mob {
+pub fn hero_attacks(monster: &mut Monster, hero: &Hero) { //-> Mob {
     let attack_value = hero.mob.thac0;
-    let defense_value = mob.armour;
+    let defense_value = monster.mob.armour;
     let damage: i32 = if is_successful(attack_value, defense_value) {
         roll_dice(hero.mob.weapon.damage)
     } else {
         0
     };
     //println!("Attak {}, defense: {}, damage: {}", attack_value, defense_value, damage);
-    mob.hp -= damage;
+    monster.mob.hp -= damage;
     //mob
 }
 
@@ -24,7 +24,7 @@ fn roll_dice(dice: u8) -> i32 {
 
 
 
-fn is_successful(attack_value: i8, defense_value: i8) -> bool {
+fn is_successful(attack_value: i32, defense_value: i32) -> bool {
     // attack_value: 5        defense_value: 20 -> min roll -15
     // attack_value: 19        defense_value: 10 -> min roll 9
     // attack_value: 19        defense_value: 0 -> min roll 19
@@ -34,27 +34,28 @@ fn is_successful(attack_value: i8, defense_value: i8) -> bool {
 }
 
 
-fn simulate(hero: &Hero, mob: &Mob) {
+pub fn simulate(hero: &Hero, mob: &Monster) {
     let mut result: Vec<i32> = Vec::new();
-    const STEPS: i32 = 10000;
+    const STEPS: i32 = 1000;
 
     for i in 0..STEPS {
         let dummy_hero = hero.clone();
-        let mut dummy_mob = mob.clone();
+        let mut dummy_monster = mob.clone();
         let mut tries: i32 = 0;
-        while dummy_mob.hp > 0 && tries < STEPS {
-            hero_attacks(&mut dummy_mob, &dummy_hero);
+        while dummy_monster.mob.hp > 0 && tries < STEPS {
+            hero_attacks(&mut dummy_monster, &dummy_hero);
             tries +=1;
         }
         result.push(tries);
     }
-    let sum = result.iter().fold(0, |mut sum, &x| {sum += x; sum});
+    let sum = result.iter().fold(0, |mut sum, x| {sum += x; sum});
     let mean = f64::from(sum) / f64::from(STEPS);
-    println!("Hero vanquished mob in {} attacks", mean);
+    println!("Hero vanquished mob in {} attacks after {} tries", mean, STEPS);
 }
 
-#[test]
-fn attack_test1() {
+
+
+fn set_up() -> (Hero, Monster) {
     const MOB_HP: i32 = 12;
     let hero = Hero::builder()
         .name("Arn".to_string())
@@ -63,31 +64,40 @@ fn attack_test1() {
         .thac0(12)
         .armour(20)
         .build();
-
-    let mut mob = Mob::builder()
+    let monster = Monster::builder()
         .name("Goblin".to_string())
         .hp(MOB_HP)
         .weapon(make_dagger())
         .thac0(19)
-        .armour(3)
+        .armour(9)
         .build();
 
-    let mob0 = mob.clone();
-
-    simulate(&hero, &mob);
-
-
-
-    hero_attacks(&mut mob, &hero);
-    hero_attacks(&mut mob, &hero);
-    hero_attacks(&mut mob, &hero);
-
-    let hp = mob.hp;
-
-    assert!(MOB_HP >= mob.hp);
-    assert!(mob0.hp >= mob.hp);   
-    assert!(hp <= MOB_HP); 
+        (hero, monster)
+}
+#[test]
+fn attack_test1() {
     
-    println!("Mob hp {}", mob.hp);
+    let (hero, mut monster) = set_up();
 
+    let mob0 = monster.clone();
+
+    hero_attacks(&mut monster, &hero);
+    hero_attacks(&mut monster, &hero);
+    hero_attacks(&mut monster, &hero);
+
+    assert!(mob0.mob.hp >= monster.mob.hp);   
+    
+    println!("Mob hp {}", monster.mob.hp);
+
+}
+
+#[test]
+fn sumulate_combat() {
+    let (hero, monster) = set_up();
+
+    let mob0 = monster.clone();
+
+    simulate(&hero, &monster);
+
+    assert!(mob0.mob.hp >= monster.mob.hp);  
 }

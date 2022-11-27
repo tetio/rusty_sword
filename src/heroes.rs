@@ -1,7 +1,5 @@
 use crate::{weapons::{Weapon, make_bow}, mobs::Mob};
 
-
-
 #[derive(Debug, Clone)]
 pub struct Hero {
     pub mob: Mob,
@@ -45,12 +43,16 @@ impl HeroBuilder {
         self.mob.hp += hp;
         self
     }
-    pub fn thac0(mut self, thac0: i8) -> HeroBuilder {
+    pub fn thac0(mut self, thac0: i32) -> HeroBuilder {
         self.mob.thac0 = thac0;
         self
     }
-    pub fn armour(mut self, armour: i8) -> HeroBuilder {
+    pub fn armour(mut self, armour: i32) -> HeroBuilder {
         self.mob.armour = armour;
+        self
+    }
+    pub fn level(mut self, level: i32) -> HeroBuilder {
+        self.mob.level = level;
         self
     }
     pub fn build(self) -> Hero {

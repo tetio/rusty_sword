@@ -1,10 +1,15 @@
 mod heroes;
 mod mobs;
+mod monsters;
 mod combat;
 mod weapons;
+mod thac0;
+mod simulator;
 
 use heroes::Hero;    
 use mobs::Mob;
+
+
 use weapons::{make_sword, make_bow, make_dagger};
 fn main() {
     let arn = Hero::builder()
