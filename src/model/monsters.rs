@@ -72,6 +72,7 @@ fn mosters_eq_test() {
         .weapon(make_dagger())
         .thac0(0)
         .armour(20)
+        .monster_quality(MonsterQuality::Normal)
         .build();
     monster0.mob.thac0 = 19;
     let monster = Monster::builder()
@@ -80,6 +81,7 @@ fn mosters_eq_test() {
         .weapon(make_dagger())
         .thac0(19)
         .armour(20)
+        .monster_quality(MonsterQuality::Normal)
         .build();
     assert_eq!(monster.mob.thac0, monster0.mob.thac0)
 }

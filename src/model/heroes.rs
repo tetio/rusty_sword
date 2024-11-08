@@ -58,7 +58,7 @@ impl HeroBuilder {
         self
     }
     pub fn life_exp(mut self, life_exp: String) -> HeroBuilder {
-        self.mob.life_exp = life_exp;
+        self.mob.hp_per_level = life_exp;
         self
     }
     pub fn build(self) -> Hero {

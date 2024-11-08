@@ -10,7 +10,7 @@ pub struct Mob {
     pub thac0: i32,
     pub armour: i32,
     pub level: i32,
-    pub life_exp: String, // "1d6+1"
+    pub hp_per_level: String, // "1d6+1"
 }
 
 impl Mob {
@@ -49,7 +49,7 @@ pub struct MobBuilder {
     thac0: i32,
     armour: i32,
     level: i32,
-    life_exp: String,
+    hp_per_level: String,
 }
 
 impl MobBuilder {
@@ -61,7 +61,7 @@ impl MobBuilder {
             thac0: 20,
             armour: 20,
             level: 1,
-            life_exp: "1d6".to_string(),
+            hp_per_level: "1d6".to_string(),
         }
     }
     pub fn name(mut self, name: String) -> MobBuilder {
@@ -89,7 +89,7 @@ impl MobBuilder {
         self
     }
     pub fn life_exp(mut self, life_exp: String) -> MobBuilder {
-        self.life_exp = life_exp;
+        self.hp_per_level = life_exp;
         self
     }
     pub fn build(self) -> Mob {
@@ -100,7 +100,7 @@ impl MobBuilder {
             thac0: self.thac0,
             armour: self.armour,
             level: self.level,
-            life_exp: self.life_exp,
+            hp_per_level: self.hp_per_level,
         }
     }
 }
@@ -117,7 +117,7 @@ mod tests {
             thac0: 0,
             armour: 20,
             level: 1,
-            life_exp: "1d8".to_string(),
+            hp_per_level: "1d8".to_string(),
         };
         mob0.thac0 = 19;
         let mob = Mob::builder()
@@ -139,7 +139,7 @@ mod tests {
             thac0: 0,
             armour: 20,
             level: 1,
-            life_exp: "1d8".to_string(),
+            hp_per_level: "1d8".to_string(),
         };
         mob0.thac0 = 19;
         let mob = Mob::builder()
