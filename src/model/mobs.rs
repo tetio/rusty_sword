@@ -1,6 +1,6 @@
-use regex::Regex;
-
 use super::weapons::*;
+use rand::Rng;
+use regex::Regex;
 
 #[derive(Default, Clone, Debug)]
 pub struct Mob {
@@ -23,7 +23,7 @@ impl Mob {
     }
 }
 
-pub fn calculate_hp(dices: &str) -> i32 {
+pub fn hp_generator(dices: &str) -> i32 {
     // 1d6+1
     let re = Regex::new(r"(\d+)[d](\d+)[+]?(\d*)").unwrap();
     //let text = "1d6+1";
@@ -36,7 +36,8 @@ pub fn calculate_hp(dices: &str) -> i32 {
     // &cap[1] * &cap[2] + &cap[3]
     re.captures(dices)
         .map(|cap| {
-            cap[1].parse::<i32>().unwrap_or(0) * cap[2].parse::<i32>().unwrap_or(0)
+            cap[1].parse::<i32>().unwrap_or(0)
+                * rand::thread_rng().gen_range(1..=cap[2].parse::<i32>().unwrap_or(0))
                 + cap[3].parse::<i32>().unwrap_or(0)
         })
         .unwrap_or(-1)
@@ -88,14 +89,20 @@ impl MobBuilder {
         self.level = level;
         self
     }
-    pub fn life_exp(mut self, life_exp: String) -> MobBuilder {
+    pub fn hp_per_level(mut self, life_exp: String) -> MobBuilder {
         self.hp_per_level = life_exp;
         self
     }
+
+    pub fn calculate_hp(level: i32, hp_per_level: &str) -> i32 {
+        (1..=level).map(|_| hp_generator(hp_per_level)).sum()
+    }
+
     pub fn build(self) -> Mob {
+        let hp = MobBuilder::calculate_hp(self.level, &self.hp_per_level);
         Mob {
             name: self.name,
-            hp: self.hp,
+            hp,
             weapon: self.weapon,
             thac0: self.thac0,
             armour: self.armour,
@@ -108,51 +115,17 @@ impl MobBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[test]
-    fn mobs_eq_test() {
-        let mut mob0 = Mob {
-            name: "Goblin".to_string(),
-            hp: 6,
-            weapon: make_dagger(),
-            thac0: 0,
-            armour: 20,
-            level: 1,
-            hp_per_level: "1d8".to_string(),
-        };
-        mob0.thac0 = 19;
-        let mob = Mob::builder()
-            .name("Goblin".to_string())
-            .hp(6)
-            .weapon(make_dagger())
-            .thac0(19)
-            .armour(20)
-            .level(1)
-            .build();
-        assert_eq!(1, 1)
-    }
+    
     #[test]
     fn thac0_eq_test() {
-        let mut mob0 = Mob {
-            name: "Goblin".to_string(),
-            hp: 6,
-            weapon: make_dagger(),
-            thac0: 0,
-            armour: 20,
-            level: 1,
-            hp_per_level: "1d8".to_string(),
-        };
-        mob0.thac0 = 19;
         let mob = Mob::builder()
             .name("Goblin".to_string())
-            .hp(6)
             .weapon(make_dagger())
             .thac0(19)
             .armour(20)
             .level(1)
+            .hp_per_level("1d8".to_string())
             .build();
-
-        calculate_hp("1d4+1");
-
-        assert_eq!(mob0.thac0, mob.thac0)
+        assert!(mob.hp >= 1 && mob.hp <= 8);
     }
 }

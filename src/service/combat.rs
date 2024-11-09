@@ -20,22 +20,19 @@ pub fn hero_attacks(monster: Monster, hero: &Hero) -> Monster {
         0
     };
     let final_hp = monster.mob.hp - damage;
-    let mob = Mob{
+    let mob = Mob {
         hp: final_hp,
         ..monster.mob
     };
     //println!("Attak {}, defense: {}, damage: {}", attack_value, defense_value, damage);
-    Monster {
-        mob,
-        ..monster
-    }
+    Monster { mob, ..monster }
     //mob
 }
 
 pub fn attack(attacker: &Mob, defender: &mut Mob) {
     //-> Mob {
     let attack_value = attacker.thac0;
-    let weapon= &attacker.weapon;
+    let weapon = &attacker.weapon;
     let defense_value = defender.armour;
     let damage: i32 = if is_successful(attack_value, defense_value) {
         roll_dice(weapon.damage)
@@ -85,10 +82,7 @@ fn calculate_mean(results: Vec<i32>) -> f64 {
         sum
     });
     let mean = f64::from(sum) / f64::from(STEPS);
-    println!(
-        "Hero defeats mob in {} attacks after {} tries",
-        mean, STEPS
-    );
+    println!("Hero defeats mob in {} attacks after {} tries", mean, STEPS);
     mean
 }
 
@@ -129,20 +123,20 @@ mod tests {
             .armour(9)
             .monster_quality(MonsterQuality::Elite)
             .build();
-    
+
         (hero, monster)
     }
 
     #[test]
     fn attack_test1() {
         let (hero, mut monster) = set_up();
-    
+
         monster = hero_attacks(monster, &hero);
         monster = hero_attacks(monster, &hero);
         monster = hero_attacks(monster, &hero);
-    
+
         assert!(monster.mob.hp >= monster.mob.hp);
-    
+
         println!("Mob hp {}", monster.mob.hp);
     }
     #[test]

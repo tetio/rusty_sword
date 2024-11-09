@@ -1,12 +1,10 @@
 use super::mobs::*;
 use super::weapons::*;
 
-
 #[derive(Debug, Clone)]
 pub struct Hero {
     pub mob: Mob,
     pub inventory: Vec<Weapon>,
-
 }
 
 impl Hero {
@@ -57,28 +55,48 @@ impl HeroBuilder {
         self.mob.level = level;
         self
     }
-    pub fn life_exp(mut self, life_exp: String) -> HeroBuilder {
+    pub fn hp_per_level(mut self, life_exp: String) -> HeroBuilder {
         self.mob.hp_per_level = life_exp;
         self
     }
     pub fn build(self) -> Hero {
-        Hero {mob: self.mob, inventory: self.inventory}
+        let mob = Mob::builder()
+            .name(self.mob.name)
+            .weapon(self.mob.weapon)
+            .thac0(self.mob.thac0)
+            .armour(self.mob.armour)
+            .level(self.mob.level)
+            .hp_per_level(self.mob.hp_per_level)
+            .build();
+        Hero {
+            mob,
+            inventory: self.inventory,
+        }
     }
 }
 
-
 #[test]
 fn builder_test() {
-    let hp = (1..5).map(|_| calculate_hp("1d6+1")).sum(); //;
+    //let hp = (1..5).map(|_| calculate_hp("1d6+1")).sum(); //;
     let mut hero = Hero::builder()
         .name("Arn".to_string())
         .add_item(make_bow())
-        .add_hp(hp)
         .thac0(16)
         .armour(20)
+        .level(1)
+        .hp_per_level("1d6+1".to_string())
         .build();
-    hero.mob.hp -= 5;
     assert_eq!(1, hero.inventory.len());
-    assert_eq!(hp-5, hero.mob.hp)
+    (1..100).for_each(|_| {
+        hero = Hero::builder()
+            .name("Arn".to_string())
+            .add_item(make_bow())
+            .thac0(16)
+            .armour(20)
+            .level(1)
+            .hp_per_level("1d6+1".to_string())
+            .build();
+        assert!(hero.mob.hp >= 2 && hero.mob.hp <= 7);
+        println!(".")
+    });
 }
-

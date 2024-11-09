@@ -7,13 +7,13 @@ pub enum MonsterQuality {
     #[default]
     Normal,
     Special,
-    Elite
+    Elite,
 }
 
 #[derive(Default, Clone, Debug)]
 pub struct Monster {
     pub mob: Mob,
-    pub monster_quality: MonsterQuality
+    pub monster_quality: MonsterQuality,
 }
 
 impl Monster {
@@ -25,7 +25,7 @@ impl Monster {
 #[derive(Default, Clone, Debug)]
 pub struct MonsterBuilder {
     pub mob: Mob,
-    monster_quality: MonsterQuality  
+    monster_quality: MonsterQuality,
 }
 
 impl MonsterBuilder {
@@ -58,10 +58,12 @@ impl MonsterBuilder {
         self
     }
     pub fn build(self) -> Monster {
-        Monster {mob: self.mob, monster_quality: self.monster_quality}
-    }    
+        Monster {
+            mob: self.mob,
+            monster_quality: self.monster_quality,
+        }
+    }
 }
-
 
 #[test]
 fn mosters_eq_test() {
@@ -85,4 +87,3 @@ fn mosters_eq_test() {
         .build();
     assert_eq!(monster.mob.thac0, monster0.mob.thac0)
 }
-
