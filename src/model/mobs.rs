@@ -23,7 +23,7 @@ impl Mob {
     }
 }
 
-pub fn hp_generator(dices: &str) -> i32 {
+fn hp_generator(dices: &str) -> i32 {
     // 1d6+1
     let re = Regex::new(r"(\d+)[d](\d+)[+]?(\d*)").unwrap();
     //let text = "1d6+1";

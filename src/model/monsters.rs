@@ -58,8 +58,16 @@ impl MonsterBuilder {
         self
     }
     pub fn build(self) -> Monster {
+        let mob = Mob::builder()
+            .name(self.mob.name)
+            .weapon(self.mob.weapon)
+            .thac0(self.mob.thac0)
+            .armour(self.mob.armour)
+            .level(self.mob.level)
+            .hp_per_level(self.mob.hp_per_level)
+            .build();
         Monster {
-            mob: self.mob,
+            mob,
             monster_quality: self.monster_quality,
         }
     }
