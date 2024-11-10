@@ -57,6 +57,10 @@ impl MonsterBuilder {
         self.mob.level = level;
         self
     }
+    pub fn hp_per_level(mut self, hp_per_level: String) -> MonsterBuilder {
+        self.mob.hp_per_level = hp_per_level;
+        self
+    }
     pub fn build(mut self) -> Monster {
         self.mob.hp = MobBuilder::calculate_hp(self.mob.level, self.mob.hp_per_level.as_str());
         Monster {

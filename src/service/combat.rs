@@ -1,4 +1,4 @@
-use crate::model;
+use crate::model::{self, monsters};
 use crate::model::mobs::Mob;
 use crate::model::monsters::MonsterQuality;
 
@@ -14,7 +14,7 @@ pub fn hero_attacks(monster: Monster, hero: &Hero) -> Monster {
     //-> Mob {
     let attack_value = hero.mob.thac0;
     let defense_value = monster.mob.armour;
-    let damage: i32 = if is_successful(attack_value, defense_value) {
+    let damage: i32 = if is_attack_successful(attack_value, defense_value) {
         roll_dice(hero.mob.weapon.damage)
     } else {
         0
@@ -34,7 +34,7 @@ pub fn attack(attacker: &Mob, defender: &mut Mob) {
     let attack_value = attacker.thac0;
     let weapon = &attacker.weapon;
     let defense_value = defender.armour;
-    let damage: i32 = if is_successful(attack_value, defense_value) {
+    let damage: i32 = if is_attack_successful(attack_value, defense_value) {
         roll_dice(weapon.damage)
     } else {
         0
@@ -52,7 +52,7 @@ fn roll_dice(dice: u8) -> i32 {
     rand::thread_rng().gen_range(1..=dice_faces)
 }
 
-fn is_successful(attack_value: i32, defense_value: i32) -> bool {
+fn is_attack_successful(attack_value: i32, defense_value: i32) -> bool {
     // attack_value: 5        defense_value: 20 -> min roll -15
     // attack_value: 19        defense_value: 10 -> min roll 9
     // attack_value: 19        defense_value: 0 -> min roll 19
@@ -108,23 +108,38 @@ pub fn single_combat(hero: &mut Hero, monster: &mut Monster) -> (i32, String) {
         match rounds % 2 {
             0 => attack(&hero.mob, &mut monster.mob),
             1 => attack(&monster.mob, &mut hero.mob),
-            _=> panic!("Invalid round number")
+            _ => panic!("Invalid round number"),
         }
         rounds += 1;
     }
-    (rounds, "none".to_string())
+    if hero.mob.hp <= 0 {
+        (rounds, "monster".to_string())
+    } else {
+        (rounds, "hero".to_string())
+    }
 }
 
-pub fn battle(human_army: Vec<Hero>, orc_army: Vec<Monster>) -> (i32, String) {
+pub fn battle(human_army: &mut Vec<Hero>, monster_army: &mut Vec<Monster>) -> i32 {
     let human_army_size = human_army.len();
-    let orc_army_size = orc_army.len();
+    let monster_army_size = monster_army.len();
     let mut end_of_battle = false;
+    let mut total_rounds = 0;
     while !end_of_battle {
 
+        let res = single_combat(&mut human_army[0], &mut monster_army[0]);
+        total_rounds += res.0;
+        if res.1.as_str() == "hero" {
+            monster_army.remove(0);
+        } else if res.1.as_str() == "monster" {
+            human_army.remove(0);
+        } else {
+            panic!("Invalid winner");
+        }
+        end_of_battle = human_army.len() < human_army_size * 66 / 100
+            || monster_army.len() < monster_army_size * 66 / 100;
     }
-    (0, "none".to_string())
-} 
-
+    total_rounds
+}
 
 #[cfg(test)]
 mod tests {
@@ -138,6 +153,7 @@ mod tests {
             .add_hp(20)
             .thac0(12)
             .armour(20)
+            .level(1)
             .build();
         let monster = Monster::builder()
             .name("Goblin".to_string())
@@ -146,6 +162,7 @@ mod tests {
             .thac0(19)
             .armour(9)
             .monster_quality(MonsterQuality::Elite)
+            .level(1)
             .build();
 
         (hero, monster)
@@ -170,4 +187,44 @@ mod tests {
         simulate(&hero.mob, &monster.mob);
         assert!(mob0.mob.hp >= monster.mob.hp);
     }
+
+
+    #[test]
+    fn battle_0_test() {
+        let hero = Hero::builder()
+        .name("Arn".to_string())
+        .weapon(make_sword())
+        .thac0(20)
+        .armour(10)
+        .level(1)
+        .hp_per_level("1d6".to_string())
+        .build();
+    let monster = Monster::builder()
+        .name("Goblin".to_string())
+        .weapon(make_dagger())
+        .thac0(12)
+        .armour(10)
+        .level(1)
+        .hp_per_level("1d6".to_string())
+        .monster_quality(MonsterQuality::Elite)
+        .build(); 
+
+
+        let mut human_army = (0..10).map(|_| hero.clone()).collect::<Vec<Hero>>();
+        let mut monster_army = (0..10).map(|_| monster.clone()).collect::<Vec<Monster>>();
+        let res = battle(&mut human_army, &mut monster_army);
+        println!("Total rounds {}", res);
+        if human_army.len() == monster_army.len() {
+            println!("Draw");
+        } else if human_army.len() > monster_army.len() {
+            println!("Hero wins");
+        } else {
+            println!("Monster wins");
+        }
+        assert!(res > 1);
+        
+    }
+
+
+
 }
