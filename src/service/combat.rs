@@ -102,6 +102,30 @@ pub fn simulate(attacker: &Mob, defender: &Mob) -> f64 {
     calculate_mean(result)
 }
 
+pub fn single_combat(hero: &mut Hero, monster: &mut Monster) -> (i32, String) {
+    let mut rounds: i32 = 0;
+    while hero.mob.hp > 0 && monster.mob.hp > 0 {
+        match rounds % 2 {
+            0 => attack(&hero.mob, &mut monster.mob),
+            1 => attack(&monster.mob, &mut hero.mob),
+            _=> panic!("Invalid round number")
+        }
+        rounds += 1;
+    }
+    (rounds, "none".to_string())
+}
+
+pub fn battle(human_army: Vec<Hero>, orc_army: Vec<Monster>) -> (i32, String) {
+    let human_army_size = human_army.len();
+    let orc_army_size = orc_army.len();
+    let mut end_of_battle = false;
+    while !end_of_battle {
+
+    }
+    (0, "none".to_string())
+} 
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
