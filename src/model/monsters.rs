@@ -57,17 +57,10 @@ impl MonsterBuilder {
         self.mob.level = level;
         self
     }
-    pub fn build(self) -> Monster {
-        let mob = Mob::builder()
-            .name(self.mob.name)
-            .weapon(self.mob.weapon)
-            .thac0(self.mob.thac0)
-            .armour(self.mob.armour)
-            .level(self.mob.level)
-            .hp_per_level(self.mob.hp_per_level)
-            .build();
+    pub fn build(mut self) -> Monster {
+        self.mob.hp = MobBuilder::calculate_hp(self.mob.level, self.mob.hp_per_level.as_str());
         Monster {
-            mob,
+            mob: self.mob,
             monster_quality: self.monster_quality,
         }
     }

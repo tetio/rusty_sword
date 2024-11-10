@@ -55,21 +55,14 @@ impl HeroBuilder {
         self.mob.level = level;
         self
     }
-    pub fn hp_per_level(mut self, life_exp: String) -> HeroBuilder {
-        self.mob.hp_per_level = life_exp;
+    pub fn hp_per_level(mut self, hp_per_level: String) -> HeroBuilder {
+        self.mob.hp_per_level = hp_per_level;
         self
     }
-    pub fn build(self) -> Hero {
-        let mob = Mob::builder()
-            .name(self.mob.name)
-            .weapon(self.mob.weapon)
-            .thac0(self.mob.thac0)
-            .armour(self.mob.armour)
-            .level(self.mob.level)
-            .hp_per_level(self.mob.hp_per_level)
-            .build();
+    pub fn build(mut self) -> Hero {
+        self.mob.hp = MobBuilder::calculate_hp(self.mob.level, self.mob.hp_per_level.as_str());
         Hero {
-            mob,
+            mob: self.mob,
             inventory: self.inventory,
         }
     }

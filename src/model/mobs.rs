@@ -43,6 +43,7 @@ fn hp_generator(dices: &str) -> i32 {
         .unwrap_or(-1)
 }
 
+
 pub struct MobBuilder {
     name: String,
     hp: i32,
