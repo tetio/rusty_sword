@@ -1,6 +1,6 @@
-use crate::model::{self, monsters};
 use crate::model::mobs::Mob;
 use crate::model::monsters::MonsterQuality;
+use crate::model::{self, monsters};
 
 use model::heroes::Hero;
 use model::monsters::Monster;
@@ -9,6 +9,8 @@ use model::weapons::*;
 use rand::Rng;
 
 const STEPS: i32 = 1000;
+const HERO_CASUALTIES_THRESHOLD: usize = 66;
+const MONSTER_CASUALTIES_THRESHOLD: usize = 50;
 
 pub fn hero_attacks(monster: Monster, hero: &Hero) -> Monster {
     //-> Mob {
@@ -119,13 +121,12 @@ pub fn single_combat(hero: &mut Hero, monster: &mut Monster) -> (i32, String) {
     }
 }
 
-pub fn battle(human_army: &mut Vec<Hero>, monster_army: &mut Vec<Monster>) -> i32 {
+pub fn battle(human_army: &mut Vec<Hero>, monster_army: &mut Vec<Monster>) -> (i32, i32) {
     let human_army_size = human_army.len();
     let monster_army_size = monster_army.len();
     let mut end_of_battle = false;
     let mut total_rounds = 0;
     while !end_of_battle {
-
         let res = single_combat(&mut human_army[0], &mut monster_army[0]);
         total_rounds += res.0;
         if res.1.as_str() == "hero" {
@@ -135,10 +136,24 @@ pub fn battle(human_army: &mut Vec<Hero>, monster_army: &mut Vec<Monster>) -> i3
         } else {
             panic!("Invalid winner");
         }
-        end_of_battle = human_army.len() < human_army_size * 66 / 100
-            || monster_army.len() < monster_army_size * 66 / 100;
+        end_of_battle = human_army.len() < human_army_size * HERO_CASUALTIES_THRESHOLD / 100
+            || monster_army.len() < monster_army_size * MONSTER_CASUALTIES_THRESHOLD / 100;
     }
-    total_rounds
+    println!(
+        "Human casualties = {}, Monster casualties = {}",
+        human_army_size - human_army.len(),
+        monster_army_size - monster_army.len()
+    );
+    println!("Total rounds {}", total_rounds);
+    let who_wins = match (
+        human_army.len() >= human_army_size * HERO_CASUALTIES_THRESHOLD / 100,
+        monster_army.len() >= monster_army_size * MONSTER_CASUALTIES_THRESHOLD / 100,
+    ) {
+        (true, false) => 1,
+        (false, true) => -1,
+        (_, _) => 0,
+    };
+    (total_rounds, who_wins)
 }
 
 #[cfg(test)]
@@ -188,43 +203,37 @@ mod tests {
         assert!(mob0.mob.hp >= monster.mob.hp);
     }
 
-
     #[test]
     fn battle_0_test() {
         let hero = Hero::builder()
-        .name("Arn".to_string())
-        .weapon(make_sword())
-        .thac0(20)
-        .armour(10)
-        .level(1)
-        .hp_per_level("1d6".to_string())
-        .build();
-    let monster = Monster::builder()
-        .name("Goblin".to_string())
-        .weapon(make_dagger())
-        .thac0(12)
-        .armour(10)
-        .level(1)
-        .hp_per_level("1d6".to_string())
-        .monster_quality(MonsterQuality::Elite)
-        .build(); 
+            .name("Arn".to_string())
+            .weapon(make_sword())
+            .thac0(18)
+            .armour(8)
+            .level(1)
+            .hp_per_level("1d8".to_string())
+            .build();
+        let monster = Monster::builder()
+            .name("Goblin".to_string())
+            .weapon(make_dagger())
+            .thac0(19)
+            .armour(9)
+            .level(1)
+            .hp_per_level("1d6".to_string())
+            .monster_quality(MonsterQuality::Elite)
+            .build();
 
-
-        let mut human_army = (0..10).map(|_| hero.clone()).collect::<Vec<Hero>>();
-        let mut monster_army = (0..10).map(|_| monster.clone()).collect::<Vec<Monster>>();
+        let mut human_army = (0..1000).map(|_| hero.clone()).collect::<Vec<Hero>>();
+        let mut monster_army = (0..2000).map(|_| monster.clone()).collect::<Vec<Monster>>();
         let res = battle(&mut human_army, &mut monster_army);
-        println!("Total rounds {}", res);
-        if human_army.len() == monster_army.len() {
+
+        if res.1 == 0 {
             println!("Draw");
-        } else if human_army.len() > monster_army.len() {
+        } else if res.1 == 1 {
             println!("Hero wins");
         } else {
             println!("Monster wins");
         }
-        assert!(res > 1);
-        
+        assert!(res.0 > 1);
     }
-
-
-
 }
