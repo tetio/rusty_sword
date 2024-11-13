@@ -230,9 +230,9 @@ mod tests {
         if res.1 == 0 {
             println!("Draw");
         } else if res.1 == 1 {
-            println!("Hero wins");
+            println!("Humans win");
         } else {
-            println!("Monster wins");
+            println!("Monsters win");
         }
         assert!(res.0 > 1);
     }
